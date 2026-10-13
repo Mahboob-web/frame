@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#075238" />
+<title>Bano Qabil Gujrat — Graduation Photo Frame 2026</title>
+<style>
+:root{color-scheme:light;--green:#075238;--gold:#edc13b;--ink:#153b2a}
+*{box-sizing:border-box}body{margin:0;background:#f3f6f3;color:var(--ink);font-family:Arial,Helvetica,sans-serif}
+header{background:var(--green);color:white;padding:22px 16px;text-align:center}header h1{font-size:clamp(20px,4vw,30px);margin:0 0 6px}header p{margin:0;color:#e5f0e9;font-size:14px}
+main{width:min(100% - 24px,900px);margin:20px auto 36px;display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,.8fr);gap:20px;align-items:start}
+.preview{background:white;border-radius:16px;padding:10px;box-shadow:0 4px 18px #0c3c2514}.canvas-wrap{width:100%;line-height:0}canvas{width:100%;height:auto;display:block;border-radius:8px;touch-action:none;background:#075238}
+.panel{background:white;border-radius:16px;padding:18px;box-shadow:0 4px 18px #0c3c2514}.panel h2{margin:0 0 8px;font-size:20px}.help{font-size:14px;line-height:1.55;color:#52675c;margin:0 0 16px}
+.upload{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px 12px;background:var(--green);color:white;border-radius:10px;font-weight:700;cursor:pointer;text-align:center}.upload input{display:none}
+.control{margin-top:18px}.control label{display:flex;justify-content:space-between;gap:8px;font-size:14px;font-weight:700;margin-bottom:8px}input[type=range]{width:100%;accent-color:var(--green)}.buttons{display:grid;gap:10px;margin-top:20px}.btn{border:0;border-radius:10px;padding:13px 14px;font-size:15px;font-weight:700;cursor:pointer}.primary{background:var(--gold);color:#173c2a}.secondary{background:#eaf1ec;color:var(--green)}.note{font-size:12px;color:#63766a;line-height:1.5;margin:14px 0 0}.status{font-size:13px;color:var(--green);margin-top:10px;min-height:18px}
+footer{text-align:center;padding:0 16px 24px;color:#718075;font-size:12px}
+@media(max-width:700px){main{grid-template-columns:1fr;width:min(100% - 18px,520px);margin-top:12px;gap:12px}.panel{padding:16px}header{padding:18px 12px}.preview{padding:7px}}
+</style>
+</head>
+<body>
+<header><h1>Graduation Ceremony 2026</h1><p>Bano Qabil Gujrat · Create your photo frame</p></header>
+<main>
+  <section class="preview" aria-label="Photo frame preview"><div class="canvas-wrap"><canvas id="canvas" width="1536" height="1536" aria-label="Graduation frame preview"></canvas></div></section>
+  <section class="panel">
+    <h2>Make your frame</h2>
+    <p class="help">Upload a clear photo, then drag it inside the circle to position it. Use the zoom control if needed, then download your poster.</p>
+    <label class="upload">📷 Choose your photo<input id="photoInput" type="file" accept="image/*" /></label>
+    <div class="control"><label for="zoom"><span>Photo zoom</span><span id="zoomValue">100%</span></label><input id="zoom" type="range" min="80" max="220" value="100" /></div>
+    <div class="buttons"><button class="btn primary" id="download">Download my poster</button><button class="btn secondary" id="reset">Reset photo position</button></div>
+    <div class="status" id="status" role="status">Choose a photo to get started.</div>
+    <p class="note">Your photo is processed in your browser and is not uploaded to this website. Download the finished image and share it on WhatsApp, Facebook or Instagram.</p>
+  </section>
+</main>
+<footer>Bano Qabil Gujrat · Graduation Ceremony 2026</footer>
+<script>
+const canvas=document.getElementById('canvas'),ctx=canvas.getContext('2d');
+const frame=new Image();frame.src='/frame.png';
+const photoInput=document.getElementById('photoInput'),zoom=document.getElementById('zoom'),zoomValue=document.getElementById('zoomValue'),statusEl=document.getElementById('status');
+const cx=750,cy=806,r=291;let photo=null,scale=1,offsetX=0,offsetY=0,dragging=false,lastX=0,lastY=0;
+function coverScale(){if(!photo)return 1;return Math.max((r*2)/photo.width,(r*2)/photo.height)}
+function render(){if(!frame.complete||!frame.naturalWidth)return;ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#075238';ctx.fillRect(0,0,canvas.width,canvas.height);
+ if(photo){ctx.save();ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.clip();const base=coverScale()*scale;const dw=photo.width*base,dh=photo.height*base;ctx.drawImage(photo,cx-dw/2+offsetX,cy-dh/2+offsetY,dw,dh);ctx.restore();}
+ ctx.drawImage(frame,0,0,canvas.width,canvas.height);
+}
+frame.onload=render;frame.onerror=()=>{statusEl.textContent='Frame could not load. Please refresh the page.'};
+photoInput.addEventListener('change',e=>{const file=e.target.files&&e.target.files[0];if(!file)return;if(!file.type.startsWith('image/')){statusEl.textContent='Please choose an image file.';return}const url=URL.createObjectURL(file);const im=new Image();im.onload=()=>{photo=im;scale=Number(zoom.value)/100;offsetX=0;offsetY=0;zoomValue.textContent=zoom.value+'%';render();statusEl.textContent='Photo added. Drag it inside the frame to adjust.';URL.revokeObjectURL(url)};im.onerror=()=>{statusEl.textContent='Could not open that image. Try another photo.';URL.revokeObjectURL(url)};im.src=url;});
+zoom.addEventListener('input',()=>{scale=Number(zoom.value)/100;zoomValue.textContent=zoom.value+'%';render()});
+function pos(e){const b=canvas.getBoundingClientRect();return{x:(e.clientX-b.left)*canvas.width/b.width,y:(e.clientY-b.top)*canvas.height/b.height}}
+canvas.addEventListener('pointerdown',e=>{if(!photo)return;dragging=true;canvas.setPointerCapture(e.pointerId);const p=pos(e);lastX=p.x;lastY=p.y});
+canvas.addEventListener('pointermove',e=>{if(!dragging)return;const p=pos(e);offsetX+=p.x-lastX;offsetY+=p.y-lastY;lastX=p.x;lastY=p.y;render()});
+canvas.addEventListener('pointerup',()=>dragging=false);canvas.addEventListener('pointercancel',()=>dragging=false);
+document.getElementById('reset').addEventListener('click',()=>{offsetX=0;offsetY=0;zoom.value=100;scale=1;zoomValue.textContent='100%';render();statusEl.textContent=photo?'Photo position reset.':'Choose a photo to get started.'});
+document.getElementById('download').addEventListener('click',()=>{if(!photo){statusEl.textContent='Please choose your photo first.';return}render();canvas.toBlob(blob=>{if(!blob){statusEl.textContent='Could not create the image. Please try again.';return}const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Bano-Qabil-Gujrat-Graduation-2026.png';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1500);statusEl.textContent='Your poster is ready to share!'},'image/png')});
+</script>
+</body>
+</html>
